@@ -19,6 +19,7 @@ public class Vehicle {
     private Integer id;
 
     private String plate;
+    @Enumerated(EnumType.STRING)
     private VehicleType type;
     private Integer axles;
     private Boolean is_emergency;
