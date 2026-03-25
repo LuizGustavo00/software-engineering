@@ -26,6 +26,21 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: softwareengineer
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
     - uses: actions/checkout@v4
     
@@ -38,5 +53,15 @@ jobs:
     
     - name: Compile with Maven
       run: ./mvnw clean install
+      env:
+        DB_URL: jdbc:postgresql://localhost:5432/softwareengineer
+        DB_DRIVER: org.postgresql.Driver
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+        DDL_AUTO: validate
+        FLYWAY_ENABLED: "true"
+        ALLOW_JDBC_METADATA: "false"
+        H2_CONSOLE: "false"
 
     
