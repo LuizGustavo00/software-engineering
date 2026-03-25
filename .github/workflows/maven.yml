@@ -1,0 +1,42 @@
+# Pipeline CI/CD - Java com Maven
+# Etapas: Build → Test → Cobertura → Deploy (GitHub Pages)
+# O site gerado (relatórios de testes + cobertura) é publicado como uma URL pública.
+
+name: Java CI/CD with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Permissões necessárias para o job de deploy-pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  checks: write
+
+jobs:
+  # ──────────────────────────────────────────
+  # ETAPA 1 — BUILD
+  # Compila o projeto
+  # ──────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 25
+      uses: actions/setup-java@v4
+      with:
+        java-version: '25'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Compile with Maven
+      run: ./mvnw clean install
+
+    
