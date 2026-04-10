@@ -10,7 +10,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// Importar TollStation quando o Luiz terminar
+import br.inatel.SoftwareEngineer.domain.tallStation.TallStation;
+
 @Entity
 @Getter
 @Setter
@@ -27,16 +28,17 @@ public class Passages {
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
 
-    // @ManyToOne
-    // @JoinColumn(name = "toll_station_id")
-    // private TollStation tollStation;
+    @ManyToOne
+    @JoinColumn(name = "tall_station_id")
+    private TallStation tallStation;
 
     private String location;
     private LocalDateTime timestamp;
     private BigDecimal amountPaid;
     private BigDecimal multiplierApplied;
 
-    public Passages(Vehicle vehicle, String location, LocalDateTime timestamp, BigDecimal amountPaid, BigDecimal multiplierApplied) {
+    public Passages(Vehicle vehicle, String location, LocalDateTime timestamp, BigDecimal amountPaid,
+            BigDecimal multiplierApplied) {
         this.vehicle = vehicle;
         this.location = location;
         this.timestamp = timestamp;
