@@ -5,6 +5,7 @@ import br.inatel.SoftwareEngineer.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class VehicleController {
     private VehicleRepository vehicleRepository;
 
     @PostMapping("/create")
-    public ResponseEntity<Vehicle> createVehicle(@RequestBody Vehicle vehicle) {
+    public ResponseEntity<Vehicle> createVehicle(@Valid @RequestBody Vehicle vehicle) {
         Vehicle saved = vehicleRepository.save(vehicle);
         return ResponseEntity.ok(saved);
     }
