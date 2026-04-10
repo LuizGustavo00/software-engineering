@@ -30,9 +30,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: softwareengineer
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ${{secrets.DB_NAME}}
+          POSTGRES_USER: ${{secrets.DB_USER}}
+          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -54,7 +54,7 @@ jobs:
     - name: Wait for PostgreSQL to be ready
       run: |
         for i in {1..30}; do
-          if pg_isready -h localhost -p 5432 -U postgres; then
+          if pg_isready -h localhost -p 5432 -U ${{secrets.DB_USER}}; then
             echo "PostgreSQL is ready!"
             break
           fi
@@ -62,20 +62,20 @@ jobs:
           sleep 1
         done
       env:
-        PGPASSWORD: postgres
+        PGPASSWORD: ${{secrets.DB_PASSWORD}}
     
     - name: Create PostgreSQL Database
-      run: createdb -h localhost -U postgres -w softwareengineer || true
+      run: createdb -h localhost -U ${{secrets.DB_USER}} -w ${{secrets.DB_NAME}} || true
       env:
-        PGPASSWORD: postgres
+        PGPASSWORD: ${{secrets.DB_PASSWORD}}
     
     - name: Compile with Maven
       run: ./mvnw clean install -DskipTests
       env:
         DB_URL: jdbc:postgresql://localhost:5432/softwareengineer
         DB_DRIVER: org.postgresql.Driver
-        DB_USER: postgres
-        DB_PASSWORD: postgres
+        DB_USER: ${{secrets.DB_USER}}
+        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
         DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
         DDL_AUTO: validate
         FLYWAY_ENABLED: "true"
@@ -114,14 +114,32 @@ jobs:
 
   # ──────────────────────────────────────────
   # ETAPA 3 — NOTIFICAÇÃO
-  # Envia notificação por e-mail com o status do build
+  # Instala msmtp na VM e envia e-mail com o resultado do pipeline
   # ──────────────────────────────────────────
   notify:
     runs-on: ubuntu-latest
-    needs: [test, build]
+    needs: [build, test]
     if: always()
     steps:
-      - name: Simulate Email Notification
+      - uses: actions/checkout@v4
+
+      - name: Determine build status
+        id: status
         run: |
-          echo "Sending notification to ${{ secrets.NOTIFICATION_EMAIL }}"
-          echo "Build Status: ${{ needs.test.result == 'success' && needs.build.result == 'success' && 'SUCCESS' || 'FAILED' }}"
+          if [ "${{ needs.build.result }}" = "success" ] && [ "${{ needs.test.result }}" = "success" ]; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send email notification
+        run: bash .github/scripts/send_notification.sh
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL }}
+          BUILD_STATUS: ${{ steps.status.outputs.result }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
