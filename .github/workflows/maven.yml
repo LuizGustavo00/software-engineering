@@ -70,7 +70,7 @@ jobs:
         PGPASSWORD: postgres
     
     - name: Compile with Maven
-      run: ./mvnw clean install
+      run: ./mvnw clean install -DskipTests
       env:
         DB_URL: jdbc:postgresql://localhost:5432/softwareengineer
         DB_DRIVER: org.postgresql.Driver
@@ -87,8 +87,6 @@ jobs:
       with:
         name: software-engineering-app
         path: target/*.jar
-
-    
 
   # ──────────────────────────────────────────
   # ETAPA 2 — TESTES
@@ -112,10 +110,12 @@ jobs:
     - name: Run Tests with Maven
       run: ./mvnw test
       env:
-        FLYWAY_ENABLED: "true"
-        ALLOW_JDBC_METADATA: "false"
-        H2_CONSOLE: "false"
+        SPRING_PROFILE_ACTIVE: test
 
+  # ──────────────────────────────────────────
+  # ETAPA 3 — NOTIFICAÇÃO
+  # Envia notificação por e-mail com o status do build
+  # ──────────────────────────────────────────
   notify:
     runs-on: ubuntu-latest
     needs: [test, build]
