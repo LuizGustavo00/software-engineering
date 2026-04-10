@@ -24,17 +24,20 @@ public class TallStation {
     private Integer id;
 
     private String name;
-    
+
+    private String location;
+
     @Column(name = "base_price", precision = 10, scale = 2)
     private BigDecimal basePrice;
 
-    public TallStation(String name, BigDecimal basePrice) {
+    public TallStation(String name, String location, BigDecimal basePrice) {
         this.name = name;
+        this.location = location;
         this.basePrice = basePrice;
     }
 
     public BigDecimal calculateTall(Vehicle vehicle, LocalTime time) {
-        
+
         if (Boolean.TRUE.equals(vehicle.getIs_emergency())) {
             return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
@@ -49,18 +52,16 @@ public class TallStation {
         return finalAmount.setScale(2, RoundingMode.HALF_UP);
     }
 
-
-
     public boolean isPeakHour(LocalTime time) {
-    /*Morning: 07:00 - 09:00 | Evening: 17:00 - 19:00*/
-    
-    if (time == null) {
+        /* Morning: 07:00 - 09:00 | Evening: 17:00 - 19:00 */
+
+        if (time == null) {
             time = LocalTime.now();
         }
         int hour = time.getHour();
         boolean isMorningPeak = hour >= 7 && hour < 9;
         boolean isEveningPeak = hour >= 17 && hour < 19;
-        
+
         return isMorningPeak || isEveningPeak;
     }
 }

@@ -16,13 +16,13 @@ class TallStationTest {
 
     @BeforeEach
     void setUp() {
-        tallStation = new TallStation("Pedágio Principal", new BigDecimal("5.00"));
+        tallStation = new TallStation("Pedágio Principal", "Rodovia BR-116", new BigDecimal("5.00"));
     }
 
     @Test
     void calculateSixAxlesTruck() {
         Vehicle truck = new Vehicle("ABC-1234", VehicleType.TRUCK, 6, false);
-        
+
         BigDecimal result = tallStation.calculateTall(truck, LocalTime.of(10, 0));
 
         assertEquals(new BigDecimal("30.00"), result);
@@ -42,7 +42,7 @@ class TallStationTest {
     @Test
     void emergencyVehicles() {
         Vehicle ambulance = new Vehicle("SOS-1920", VehicleType.CAR, 2, true);
-        
+
         BigDecimal result = tallStation.calculateTall(ambulance, LocalTime.of(8, 0));
 
         assertEquals(new BigDecimal("0.00"), result);
